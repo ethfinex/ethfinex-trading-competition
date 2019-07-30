@@ -6,14 +6,26 @@ const collection = require('../lib/mongodb/collection')
 const BigNumber = require('bignumber.js')
 const _ = require('lodash')
 
-module.exports = async (token) => {
+module.exports = async (token, startDate, endDate) => {
   token = token.toUpperCase()
 
   Stats = collection('stats')
 
   const options = {sort: {date: 1}}
 
-  const docs = await Stats.find({}, options).toArray()
+  const query = {}
+
+  if(startDate){
+    query.timestamp = query.timestamp || {}
+    query.timestamp['$gte'] = startDate
+  }
+
+  if(endDate){
+    query.timestamp = query.timestamp || {}
+    query.timestamp['$lte'] = endDate
+  }
+
+  const docs = await Stats.find(query, options).toArray()
 
   const dates = []
   const volume = {}

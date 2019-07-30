@@ -7,14 +7,31 @@ const collection = require('../lib/mongodb/collection')
 const BigNumber = require('bignumber.js')
 const _ = require('lodash')
 
-module.exports = async () => {
+module.exports = async (startDate, endDate) => {
   Stats = collection('stats')
 
-  const docs = await Stats.find({}).toArray()
+  const options = {sort: {date: 1}}
+
+  const query = {}
+
+  if(startDate){
+    query.timestamp = query.timestamp || {}
+    query.timestamp['$gte'] = startDate
+  }
+
+  if(endDate){
+    query.timestamp = query.timestamp || {}
+    query.timestamp['$lte'] = endDate
+  }
+
+  const docs = await Stats.find(query, options).toArray()
 
   const results = {}
+  const dates = []
 
   for(doc of docs){
+
+    dates.push(doc.date)
 
     for(address in doc.volume){
 
@@ -38,5 +55,10 @@ module.exports = async () => {
 
   const orderedRanking = _.orderBy(ranking, 'amount').reverse()
 
-  return orderedRanking
+  const result = {
+    dates: dates,
+    ranking: orderedRanking
+  }
+
+  return result
 }

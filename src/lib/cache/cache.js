@@ -16,13 +16,7 @@ module.exports = async (query, value) => {
   if(!doc) {
     doc = await value()
 
-    Stats.insert(doc)
-  }
-
-  if(doc){
-    // when using loki we don't want to show $loki and meta
-    delete doc['$loki']
-    delete doc.meta
+    Stats.insertOne(doc)
   }
 
   return doc
